@@ -86,42 +86,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     ]),
   ];
 
-  List<Bottle> getBottleItem() {
-    List<Bottle> localBottles = [];
-    for (var x = 0; x < categories.length; x++) {
-      var currentElement = categories[x].bottleList;
-      for (var y = 0; y < currentElement.length; y++) {
-        var bottleElement = currentElement[y];
-        localBottles.add(bottleElement);
-      }
-    }
-    print(localBottles);
-    return localBottles;
-  }
-
-  late List<Bottle> allBottles = getBottleItem();
-  late List<Bottle> bottles;
   String query = " ";
-
-  void searchBottle(String query) {
-    final bottles = allBottles.where((bottle) {
-      final bottleNameLower = bottle.bottleName.toLowerCase();
-      final searchLower = query.toLowerCase();
-
-      return bottleNameLower.contains(searchLower);
-    }).toList();
-
-    setState(() {
-      this.bottles = bottles;
-      this.query = query;
-    });
-  }
 
   Widget buildSearch() {
     return SearchWidget(
       text: query,
       hintText: 'Search for beverages',
-      onChanged: searchBottle,
+      onChanged: (value) {
+        setState(() {
+          this.query = value;
+        });
+      },
     );
   }
 
@@ -190,16 +165,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   controller: tabController,
                   children: categories.map((bottleCategory) {
                     return GridView.count(
-                        crossAxisCount: 2,
-                        childAspectRatio: itemWidth / itemHeight,
-                        children: bottleCategory.bottleList.map((bottle) {
-                          return ProductItem(
-                            id: bottle.id,
-                            bottleName: bottle.bottleName,
-                            imgUrl: bottle.image,
-                            price: bottle.price,
-                          );
-                        }).toList());
+                      crossAxisCount: 2,
+                      childAspectRatio: itemWidth / itemHeight,
+                      children: categories
+                          .expand((element) => element.bottleList)
+                          .toList() //Get the flatten list of bottles
+                          .where((element) {
+                        return element.bottleName.toLowerCase().contains(
+                            query.toLowerCase()); // Apply the query string
+                      }).map((bottle) {
+                        return ProductItem(
+                          id: bottle.id,
+                          bottleName: bottle.bottleName,
+                          imgUrl: bottle.image,
+                          price: bottle.price,
+                        );
+                      }).toList(),
+                    );
                   }).toList()),
             ),
           ],
