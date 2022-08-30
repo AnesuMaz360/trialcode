@@ -167,10 +167,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     return GridView.count(
                       crossAxisCount: 2,
                       childAspectRatio: itemWidth / itemHeight,
-                      children: categories
-                          .expand((element) => element.bottleList)
-                          .toList() //Get the flatten list of bottles
-                          .where((element) {
+                      children: bottleCategory.bottleList.where((element) {
                         return element.bottleName.toLowerCase().contains(
                             query.toLowerCase()); // Apply the query string
                       }).map((bottle) {
